@@ -1,0 +1,58 @@
+import os
+from tensorflow.keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array
+
+def augment_data(data_dir, augmented_data_dir, target_images_per_class=2000):
+    """Augments images within a directory and maintains class structure."""
+
+    data_augment = ImageDataGenerator(
+        rescale=1./255,
+        brightness_range=[0.4, 1],
+        rotation_range=10,
+        zoom_range=0.1,
+        horizontal_flip=True,
+        vertical_flip=True,
+        height_shift_range=0.1,
+        width_shift_range=0.1
+    )
+
+    class_dirs = os.listdir(data_dir)
+
+    for cls in class_dirs:
+        class_dir = os.path.join(data_dir, cls)
+        output_dir = os.path.join(augmented_data_dir, cls)
+        os.makedirs(output_dir, exist_ok=True)
+
+        total_images_generated = 0
+        while total_images_generated < target_images_per_class:
+            for filename in os.listdir(class_dir):
+                if total_images_generated >= target_images_per_class:
+                    break
+
+                img = load_img(os.path.join(class_dir, filename))
+                img_array = img_to_array(img)
+                img_batch = img_array.reshape((1,) + img_array.shape)
+
+                augmented_img_generator = data_augment.flow(img_batch, batch_size=1,
+                                                            save_to_dir=output_dir,
+                                                            save_prefix='aug_',
+                                                            save_format='png')
+                next(augmented_img_generator)
+                total_images_generated += 1
+
+# Define paths for train and validation sets
+train_set_dir = '/kaggle/input/ipcv-leaf-dataset/Train Set/Train Set'  # Update with your train set directory
+valid_set_dir = '/kaggle/input/ipcv-leaf-dataset/Valid Set/Valid Set'  # Update with your valid set directory
+
+# Define output directories for augmented images (ensure they don't exist already)
+augmented_train_set_dir = '//kaggle/working/augmented_image/train_set'  # Update with your augmented train set directory
+augmented_valid_set_dir = '/kaggle/working/augmented_image/valid_set'  # Update with your augmented valid set directory
+
+# Check if output directories already exist (avoid overwriting)
+if os.path.exists(augmented_train_set_dir) or os.path.exists(augmented_valid_set_dir):
+    print("Error: Output directories for augmented images already exist. Choose different paths or delete existing ones.")
+else:
+    # Augment images for train and validation sets, targeting 2000 images per class
+    augment_data(train_set_dir, augmented_train_set_dir, target_images_per_class=2000)
+    augment_data(valid_set_dir, augmented_valid_set_dir, target_images_per_class=2000)
+
+    print("Image augmentation completed! 2000 images per class generated.")
