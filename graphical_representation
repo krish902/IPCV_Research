@@ -1,0 +1,41 @@
+import matplotlib.pyplot as plt
+from sklearn.metrics import classification_report
+import pandas as pd
+
+# Generate classification report
+class_report = classification_report(true_labels, predicted_labels, output_dict=True)
+report_df = pd.DataFrame(class_report).transpose()
+
+# Plot F1 score, recall, precision, and support
+plt.figure(figsize=(10, 6))
+
+# F1 Score plot
+plt.subplot(2, 2, 1)
+plt.bar(report_df.index[:-1], report_df['f1-score'][:-1], color='skyblue')
+plt.xlabel('Class')
+plt.ylabel('F1 Score')
+plt.title('F1 Score by Class')
+
+# Recall plot
+plt.subplot(2, 2, 2)
+plt.bar(report_df.index[:-1], report_df['recall'][:-1], color='lightgreen')
+plt.xlabel('Class')
+plt.ylabel('Recall')
+plt.title('Recall by Class')
+
+# Precision plot
+plt.subplot(2, 2, 3)
+plt.bar(report_df.index[:-1], report_df['precision'][:-1], color='salmon')
+plt.xlabel('Class')
+plt.ylabel('Precision')
+plt.title('Precision by Class')
+
+# Support plot
+plt.subplot(2, 2, 4)
+plt.bar(report_df.index[:-1], report_df['support'][:-1], color='gold')
+plt.xlabel('Class')
+plt.ylabel('Support')
+plt.title('Support by Class')
+
+plt.tight_layout()
+plt.show()
